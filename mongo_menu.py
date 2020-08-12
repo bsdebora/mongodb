@@ -5,6 +5,7 @@ MONGODB_URI = "mongodb://root:RootUser@myfirstcluster-shard-00-00.zhfps.mongodb.
 DBS_NAME = "myTestDB"
 COLLECTION_NAME = "breakfast"
 
+
 def mongo_connect(url):
     try:
         conn = pymongo.MongoClient(url)
@@ -18,7 +19,7 @@ def get_record():
     print("")
     name = input("Enter item> ")
     try:
-        doc = coll.find_one({'first': name.lower()})
+        doc = coll.find_one({'name': name.lower()})
     except:
         print("Error accessing the database")
     
@@ -30,10 +31,10 @@ def get_record():
 
 def show_menu():
     print("")
-    print("1. Add a name")
-    print("2. Find a record by name")
-    print("3. Edit a menu")
-    print("4. Delete a menu")
+    print("1. Add a new dish")
+    print("2. Find an dish by name")
+    print("3. Edit a dish")
+    print("4. Delete a dish")
     print("5. Exit")
 
     option = input("Enter option: ")
@@ -58,17 +59,70 @@ def add_record():
     except:
         print("Error accessing the database")
 
+
+def find_record():
+    doc = get_record()
+    if doc:
+        print("")
+        for k, v in doc.items():
+            if k != "_id":
+                print(k.capitalize() + ": " + v.capitalize())
+
+
+def edit_record():
+    doc = get_record()
+    if doc:
+        print("Hi")
+        update_doc = {}
+        print("")
+        for k, v in doc.items():
+            if k != "_id":
+                update_doc[k] = input(k.capitalize() + " [" + v + "] > ")
+
+                if update_doc[k] == "":
+                    update_doc[k] = v
+        
+        try:
+            coll.update_one(doc, {'$set': update_doc})
+            print("")
+            print("Document updated")
+        except:
+            print("Error accessing the database")
+
+
+def delete_record():
+
+    doc = get_record()
+
+    if doc:
+        print("")
+        for k, v in doc.items():
+            if k != "_id":
+                print(k.capitalize() + ": " + v.capitalize())
+        
+        print("")
+        confirmation = input("Is this the document you want to delete?\nY or N > ")
+        print("")
+
+        if confirmation.lower() == 'y':
+            try:
+                coll.remove(doc)
+                print("Document deleted!")
+            except:
+                print("Document not deleted")
+
+
 def main_loop():
     while True:
         option = show_menu()
         if option == "1":
             add_record()
         elif option == "2":
-            print("You have selected option 2")
+            find_record()
         elif option == "3":
-            print("You have selected option 3")
+            edit_record()
         elif option == "4":
-            print("You have selected option 4")
+            delete_record()
         elif option == "5":
             conn.close()
             break
